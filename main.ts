@@ -4,7 +4,7 @@
 // h-step changes over a ladder of horizons, interpolated in sqrt(h)), shrunk
 // toward the pooled all-market distribution of the same case, and each
 // change-quantile is then scaled toward 0 (0.7 for the inner levels and the
-// median, 0.55 for the 0.05/0.95 pair), which keeps the forecast centred on
+// median, 0.52 for the 0.05/0.95 pair), which keeps the forecast centred on
 // the last price with bands that reflect each market's own step/jump
 // behaviour, including its mass at 0. The constants were chosen on the kit's
 // practice cases. Deterministic: the output is a pure function of the case.
@@ -20,7 +20,12 @@ const WINDOW = 720; // minutes of history (by change end-time) per market
 const K_SHRINK = 3000; // pseudo-count of the pooled distribution in the blend
 const SPREAD_MONO = 1; // enforce band width non-decreasing in h
 const SCALE = 0.7; // multiplier on the inner/median change-quantiles
-const SCALE_OUT = 0.55; // multiplier on the 0.05/0.95 change-quantiles
+// SCALE_OUT was 0.55 in the first submitted configuration. On the kit's
+// practice cases the outer (0.05/0.95) bands came out slightly too wide —
+// their realised coverage ran above nominal while the inner bands were
+// calibrated — so the tail change-quantiles are pulled a little closer to
+// the last price; this lowered the practice mean pinball loss.
+const SCALE_OUT = 0.52; // multiplier on the 0.05/0.95 change-quantiles
 const LADDER = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 180, 240];
 
 interface CaseMarket { id: string; prices: number[]; }

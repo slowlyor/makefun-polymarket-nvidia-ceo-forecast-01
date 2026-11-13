@@ -117,6 +117,25 @@ function forecastCase(c: Case): { id: string; q: number[][] }[] {
       row.sort((a, b) => a - b);
       return row;
     });
+    // Final validity guard: whatever the estimation above produced, every
+    // row handed to the grader must be finite, inside [0, 1] and
+    // non-decreasing — a crossed, non-finite or out-of-range row invalidates
+    // the whole case. Enforce it directly on the finished rows: a
+    // non-finite entry falls back to the last observed price, and each
+    // entry is clamped to at least its predecessor. With the sort above
+    // this changes nothing for well-formed estimates; it exists so no
+    // future change to the estimator can silently emit an invalid row.
+    const fallback = price6(x);
+    for (const row of q) {
+      let prev = 0;
+      for (let j = 0; j < row.length; j++) {
+        let v = row[j] as number;
+        if (!Number.isFinite(v)) v = fallback;
+        v = Math.min(1, Math.max(prev, v));
+        row[j] = v;
+        prev = v;
+      }
+    }
     return { id: m.id, q };
   });
 }
